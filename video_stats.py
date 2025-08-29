@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import date
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path="./.env")
 api_key = os.environ["API_KEY"]
 chanel_handle = "MrBeast"
 max_results = 50
