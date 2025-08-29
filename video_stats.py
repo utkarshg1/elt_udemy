@@ -106,7 +106,7 @@ def get_video_data(video_id_list: list[str]):
 def save_to_json(extracted_data: list[dict]):
     file_dir = Path("data")
     file_dir.mkdir(exist_ok=True)
-    file_name = f"{date.today()}.json"
+    file_name = f"YT_data_{date.today()}.json"
     file_path = file_dir / file_name
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(extracted_data, f, indent=4, ensure_ascii=False)
