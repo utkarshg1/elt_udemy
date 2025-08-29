@@ -1,24 +1,28 @@
-import os
 import json
 import requests
 from pathlib import Path
 from datetime import date
-from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="./.env")
-api_key = os.environ["API_KEY"]
-chanel_handle = "MrBeast"
+from airflow.decorators import task
+from airflow.models import Variable
+
+# import os
+# from dotenv import load_dotenv
+# load_dotenv()
+api_key = Variable.get("API_KEY")
+channel_handle = Variable.get("CHANNEL_HANDLE")
 max_results = 50
 base_url = "https://youtube.googleapis.com/youtube/v3"
 
 
-def get_playlist_id(chanel_handle: str) -> str:
+@task
+def get_playlist_id(channel_handle: str) -> str:
     try:
         url = base_url + "/channels"
 
         params = {
             "part": "contentDetails",
-            "forHandle": chanel_handle,
+            "forHandle": channel_handle,
             "key": api_key,
         }
 
@@ -36,6 +40,7 @@ def get_playlist_id(chanel_handle: str) -> str:
         raise e
 
 
+@task
 def get_video_ids(playlist_id: str) -> list[str]:
     try:
         video_ids = []
@@ -65,12 +70,13 @@ def get_video_ids(playlist_id: str) -> list[str]:
         raise e
 
 
-def batch_list(video_id_list: list[str], batch_size: int = 50):
-    for idx in range(0, len(video_id_list), batch_size):
-        yield video_id_list[idx : idx + batch_size]
-
-
+@task
 def get_video_data(video_id_list: list[str]):
+
+    def batch_list(video_id_list: list[str], batch_size: int = 50):
+        for idx in range(0, len(video_id_list), batch_size):
+            yield video_id_list[idx : idx + batch_size]
+
     try:
         extracted_data = []
         url = base_url + "/videos"
@@ -103,6 +109,7 @@ def get_video_data(video_id_list: list[str]):
         raise e
 
 
+@task
 def save_to_json(extracted_data: list[dict]):
     file_dir = Path("data")
     file_dir.mkdir(exist_ok=True)
@@ -114,8 +121,8 @@ def save_to_json(extracted_data: list[dict]):
 
 
 if __name__ == "__main__":
-    chanel_playlist_id = get_playlist_id(chanel_handle)
-    print(f"Chanel playlist id for {chanel_handle} is {chanel_playlist_id}")
+    chanel_playlist_id = get_playlist_id(channel_handle)
+    print(f"Chanel playlist id for {channel_handle} is {chanel_playlist_id}")
     video_ids = get_video_ids(playlist_id=chanel_playlist_id)
     print(video_ids)
     video_data = get_video_data(video_ids)
