@@ -4,6 +4,7 @@ from psycopg2 import sql
 
 table = "yt_api"
 
+
 def get_conn_cursor():
     hook = PostgresHook(postgres_conn_id="postgres_db_yt_elt", database="elt_db")
     conn = hook.get_conn()
@@ -41,10 +42,7 @@ def create_table(schema):
                 "Comments_Count" INT
             );
             """
-        ).format(
-            sql.Identifier(schema).
-            sql.Identifier(table)
-        )
+        ).format(sql.Identifier(schema), sql.Identifier(table))
     else:
         table_sql = sql.SQL(
             """
@@ -59,10 +57,7 @@ def create_table(schema):
                 "Comments_Count" INT
             );
             """
-        ).format(
-            sql.Identifier(schema).
-            sql.Identifier(table)
-        )
+        ).format(sql.Identifier(schema), sql.Identifier(table))
 
     cur.execute(table_sql)
     cur.commit()
@@ -71,8 +66,7 @@ def create_table(schema):
 
 def get_video_ids(cur, schema):
     id_sql = sql.SQL("""SELECT "Video_ID" FROM {}.{};""").format(
-        sql.Identifier(schema),
-        sql.Identifier(table)
+        sql.Identifier(schema), sql.Identifier(table)
     )
 
     cur.execute(id_sql)
