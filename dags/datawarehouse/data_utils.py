@@ -60,7 +60,7 @@ def create_table(schema):
         ).format(sql.Identifier(schema), sql.Identifier(table))
 
     cur.execute(table_sql)
-    cur.commit()
+    conn.commit()
     close_conn_cur(conn, cur)
 
 
