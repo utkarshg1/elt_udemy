@@ -12,7 +12,7 @@ def get_conn_cursor():
     return conn, cur
 
 
-def close_conn_cur(conn, cur):
+def close_conn_cursor(conn, cur):
     cur.close()
     conn.close()
 
@@ -24,7 +24,7 @@ def create_schema(schema):
     )
     cur.execute(schema_sql)
     conn.commit()
-    close_conn_cur(conn, cur)
+    close_conn_cursor(conn, cur)
 
 
 def create_table(schema):
@@ -61,7 +61,7 @@ def create_table(schema):
 
     cur.execute(table_sql)
     conn.commit()
-    close_conn_cur(conn, cur)
+    close_conn_cursor(conn, cur)
 
 
 def get_video_ids(cur, schema):

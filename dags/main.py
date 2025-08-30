@@ -1,7 +1,14 @@
 from airflow import DAG
 import pendulum
 from datetime import datetime, timedelta
-from api.video_stats import get_playlist_id, get_video_ids, get_video_data, save_to_json, channel_handle
+from datawarehouse.dwh import staging_table, core_table
+from api.video_stats import (
+    get_playlist_id,
+    get_video_ids,
+    get_video_data,
+    save_to_json,
+    channel_handle,
+)
 
 local_tz = pendulum.timezone("Asia/Kolkata")
 
@@ -13,7 +20,7 @@ default_args = {
     "email": "data@engineers.com",
     "max_active_runs": 1,
     "dagrun_timeout": timedelta(hours=1),
-    "start_date": datetime(2025, 1, 1, tzinfo=local_tz)
+    "start_date": datetime(2025, 1, 1, tzinfo=local_tz),
 }
 
 with DAG(
@@ -21,7 +28,7 @@ with DAG(
     default_args=default_args,
     description="DAG to produce JSON file with raw data",
     schedule="0 14 * * *",
-    catchup=False
+    catchup=False,
 ) as dag:
     playlist_id = get_playlist_id(channel_handle)
     video_ids = get_video_ids(playlist_id)
@@ -29,3 +36,16 @@ with DAG(
     save_to_json_task = save_to_json(video_data)
 
     playlist_id >> video_ids >> video_data >> save_to_json_task
+
+
+with DAG(
+    dag_id="update_db",
+    default_args=default_args,
+    description="DAG to process JSON file and load to staging and core tables",
+    schedule="0 15 * * *",
+    catchup=False,
+) as dag:
+    update_staging = staging_table()
+    update_core = core_table()
+
+    update_staging >> update_core

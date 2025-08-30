@@ -34,7 +34,7 @@ def insert_rows(conn, cur, schema, row):
         raise e
 
 
-def update_rows(cur, conn, schema, row):
+def update_rows(conn, cur, schema, row):
     try:
         # staging
         if schema == "staging":
@@ -74,7 +74,7 @@ def update_rows(cur, conn, schema, row):
         raise e
 
 
-def delete_rows(cur, conn, schema, ids_to_delete):
+def delete_rows(conn, cur, schema, ids_to_delete):
 
     try:
 
