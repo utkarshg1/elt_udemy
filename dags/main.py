@@ -1,4 +1,5 @@
 from airflow import DAG
+from airflow.models import Variable
 import pendulum
 from datetime import datetime, timedelta
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
@@ -32,7 +33,7 @@ default_args = {
 }
 
 # Variables
-chanel_handle = "MrBeast"
+chanel_handle = Variable.get("CHANNEL_HANDLE")
 staging_schema = "staging"
 core_schema = "core"
 
