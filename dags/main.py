@@ -2,6 +2,7 @@ from airflow import DAG
 import pendulum
 from datetime import datetime, timedelta
 from datawarehouse.dwh import staging_table, core_table
+from dataquality.soda import yt_elt_data_quality
 from api.video_stats import (
     get_playlist_id,
     get_video_ids,
@@ -22,6 +23,10 @@ default_args = {
     "dagrun_timeout": timedelta(hours=1),
     "start_date": datetime(2025, 1, 1, tzinfo=local_tz),
 }
+
+# variables
+staging_schema = "staging"
+core_schema = "core"
 
 with DAG(
     dag_id="produce_json",
@@ -49,3 +54,16 @@ with DAG(
     update_core = core_table()
 
     update_staging >> update_core
+
+
+with DAG(
+    dag_id="data_quality",
+    default_args=default_args,
+    description="DAG to check data quality on both layers in db",
+    schedule="0 16 * * *",
+    catchup=False,
+) as dag:
+    soda_validate_staging = yt_elt_data_quality(staging_schema)
+    soda_validate_core = yt_elt_data_quality(core_schema)
+
+    soda_validate_staging >> soda_validate_core
